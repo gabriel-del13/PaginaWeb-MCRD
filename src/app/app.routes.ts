@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { MainFundacionComponent } from './components/pag1-fundacion/main-fundacion/main-fundacion.component';
+import { MainComponent } from './components/pag1-fundacion/main/main.component';
 
 export const routes: Routes = [
     {
-        path: '', component: MainFundacionComponent
+        path: '', component: MainComponent
     },
 ];
