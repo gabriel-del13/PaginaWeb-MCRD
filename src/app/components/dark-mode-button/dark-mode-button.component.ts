@@ -1,51 +1,46 @@
-import { Component, OnInit, Renderer2, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+
 @Component({
   selector: 'app-dark-mode-button',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './dark-mode-button.component.html',
 })
-export class DarkModeButtonComponent implements OnInit{
-  @ViewChild('switchToggle', { static: true }) switchToggle!: ElementRef;
-
+export class DarkModeButtonComponent implements OnInit {
   isDarkMode = false;
 
-  darkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-  </svg>`;
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  lightIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-  </svg>`;
-
-  constructor(private renderer: Renderer2) {}
+  get isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit() {
+    if (!this.isBrowser) return;
+    
     const savedMode = localStorage.getItem('isDarkMode');
     this.isDarkMode = savedMode === 'true';
-    this.switchTheme();
+    this.applyTheme();
   }
 
   toggleTheme() {
+    if (!this.isBrowser) return;
+    
     this.isDarkMode = !this.isDarkMode;
     localStorage.setItem('isDarkMode', this.isDarkMode.toString());
-    this.switchTheme();
+    this.applyTheme();
   }
 
-  private switchTheme() {
-    const switchToggle = this.switchToggle.nativeElement;
+  private applyTheme() {
+    if (!this.isBrowser) return;
     
     if (this.isDarkMode) {
-      this.renderer.removeClass(switchToggle, 'bg-yellow-500');
-      this.renderer.addClass(switchToggle, 'bg-gray-700');
-      this.renderer.setProperty(switchToggle, 'innerHTML', this.darkIcon);
-      this.renderer.addClass(document.documentElement, 'dark');
+      document.documentElement.classList.add('dark');
     } else {
-      this.renderer.addClass(switchToggle, 'bg-yellow-500');
-      this.renderer.removeClass(switchToggle, 'bg-gray-700');
-      this.renderer.setProperty(switchToggle, 'innerHTML', this.lightIcon);
-      this.renderer.removeClass(document.documentElement, 'dark');
+      document.documentElement.classList.remove('dark');
     }
   }
 }

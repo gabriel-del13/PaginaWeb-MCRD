@@ -1,11 +1,32 @@
-import { mergeApplicationConfig, ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { provideServerRendering } from '@angular/platform-server';
-import { appConfig } from './app.config';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { DOCUMENT } from '@angular/common';
+import { routes } from './app.routes';
 
-const serverConfig: ApplicationConfig = {
+// Mock document para SSR
+const mockDocument = {
+  documentElement: {
+    classList: {
+      add: () => {},
+      remove: () => {},
+      toggle: () => {},
+    }
+  },
+  querySelector: () => null,
+  querySelectorAll: () => [],
+} as any;
+
+export const config: ApplicationConfig = {
   providers: [
-    provideServerRendering()
+    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideRouter(routes),
+    provideHttpClient(withFetch()),
+    provideServerRendering(),
+    {
+      provide: DOCUMENT,
+      useValue: mockDocument
+    }
   ]
 };
-
-export const config = mergeApplicationConfig(appConfig, serverConfig);
